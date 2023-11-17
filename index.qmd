@@ -14,6 +14,10 @@ format:
 ### library
 
 ```{r}
+library(mice) # for imputating missing value
+library(dplyr)
+library(here)
+library(withr)
 library(tidyverse)
 library(lubridate)
 library(tidymodels)
@@ -24,6 +28,7 @@ library(ranger)
 library(ggplot2)
 library(vip)
 library(patchwork)
+library(readr)       # for importing data
 ```
 
 ### data setup
@@ -32,9 +37,7 @@ library(patchwork)
 
 ```{r}
 # All packages used in this script:
-library(tidyverse)
-library(here)
-library(withr)
+
 
 url <- "https://www.dol.gov/sites/dolgov/files/WB/media/nationaldatabaseofchildcareprices.xlsx"
 temp_xlsx <- withr::local_tempfile(fileext = ".xlsx")
@@ -75,41 +78,128 @@ childcare_costs <- childcare_costs_raw |>
     # variables describing whether certain data was imputed.
     -starts_with("i_")
   )
-
-readr::write_csv(
-  childcare_costs,
-  here::here(
-    "data",
-    "2023",
-    "2023-05-09",
-    "childcare_costs.csv"
-  )
-)
-
-readr::write_csv(
-  counties,
-  here::here(
-    "data",
-    "2023",
-    "2023-05-09",
-    "counties.csv"
-  )
-)
 ```
 
-## Running Code
+### Split the data into training and testing data
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+predictor: Center-Based Care for those who are school age based
 
 ```{r}
-1 + 1
+childcare_costs<- subset(childcare_costs, select = -c(mfccsa, mc_infant, mc_toddler, mc_preschool, mfcc_infant, mfcc_toddler, mfcc_preschool))
+childcare_costs<-childcare_costs%>%
+  rename(county = county_fips_code)
+
+childcare_costs%>%
+  group_by(county)%>%
+  summarise(missing_values = sum(is.na(mcsa)))
+
+# use mean value to fill missing value
+childcare_costs$h_under6_single_m <- ifelse(is.na(childcare_costs$h_under6_single_m), mean(childcare_costs$h_under6_single_m, na.rm = TRUE), childcare_costs$h_under6_single_m)
+childcare_costs$h_6to17_single_m <- ifelse(is.na(childcare_costs$h_6to17_single_m), mean(childcare_costs$h_6to17_single_m, na.rm = TRUE), childcare_costs$h_6to17_single_m)
+# pick out the rows includes the missing value 
+implement <- childcare_costs[is.na(childcare_costs$mcsa), ]
+childcare_modeling <- childcare_costs[complete.cases(childcare_costs), ]
+# examine the missing value
+childcare_modeling %>%
+  summarise_all(~ sum(is.na(.)))
+glimpse(childcare_costs$mcsa)
 ```
 
-You can add options to executable code like this
+split data into train and test
 
 ```{r}
-#| echo: false
-2 * 2
+set.seed(701)
+split <-initial_split(childcare_modeling)
+train<-training(split)
+test<-testing(split)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+set resample
+
+```{r}
+set.seed(234)
+folds<-vfold_cv(train, v = 10)
+```
+
+## 2.come up with models
+
+### create recipe
+
+```{r}
+recipe<-recipe(mcsa~.,data = train)%>%
+  step_dummy(all_nominal_predictors())%>%
+  step_zv(all_predictors()) %>% 
+  step_impute_knn(all_predictors())%>%
+  step_scale(all_numeric_predictors())
+bake(prep(recipe, training = train),new_data = train)
+```
+
+### lasso with penalty
+
+```{r}
+# use Cross-Validation
+lasso_grid <- grid_regular(penalty(), levels = 1000)
+lasso_mod <- linear_reg(
+  penalty = tune(), 
+  mixture = 1
+) %>%
+  set_engine("glmnet", path_values = lasso_grid$penalty)
+#create the workflow
+lasso_wf<-
+  workflow()%>%
+  add_model(lasso_mod)%>%
+  add_recipe(recipe)
+#train and tune the model
+lasso_res <- 
+  lasso_wf %>% 
+  tune_grid(folds,
+            grid = lasso_grid,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+# plot the visulization of penalty and rmse
+lasso_rmse<-
+  collect_metrics(lasso_res, summarize = FALSE) %>% 
+  filter(.metric == "rmse") 
+
+lasso_plot <-ggplot(lasso_rmse, aes(x = penalty, y = .estimate,color = id)) +
+  geom_line() +
+  geom_point() +
+  scale_x_log10(labels = scales::label_number())+
+  labs(title = "RMSE Across Lasso Resamples",
+       x = "penalty",
+       y = "RMSE") +
+  theme_minimal()
+
+lasso_plot 
+```
+
+### random forest
+
+```{r}
+#use the parallel package to query the number of cores on my computer 
+cores <- parallel::detectCores()
+cores
+#build the model
+rf_mod <- 
+  rand_forest(mtry = tune(), min_n = tune(), trees = 500) %>% 
+  set_engine("ranger",num.threads = 10) %>% 
+  set_mode("regression")
+#create the workflow
+rf_wf <- 
+  workflow() %>% 
+  add_model(rf_mod) %>% 
+  add_recipe(recipe)
+#
+set.seed(345)
+rf_res <- 
+  rf_wf %>% 
+  tune_grid(folds,
+            grid = 5,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+#
+rf_res %>% 
+  show_best(metric = "rmse")
+
+
+```
