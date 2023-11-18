@@ -4,10 +4,12 @@ Author: Zehui Li & Mujin Li
 
 1. `penalized lasso model`:
 ![penalized lasso model](lasso_plot.png){#fig-lasso_plot}
+
 2. `random forest with hyperparameter tuning`:
 ![random forest](rf_plot.jpg){#fig-rf_plot}
+
 3. `visualize the variable importance scores`:
-![variable importance scores](rf_importance_png){#fig-importance_score}
+![variable importance scores](rf_importance.png){#fig-importance_score}
 
 ### Files Description
 
