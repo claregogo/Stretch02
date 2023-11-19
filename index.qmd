@@ -188,6 +188,35 @@ lasso_plot <-ggplot(lasso_rmse, aes(x = penalty, y = .estimate,color = id)) +
 lasso_plot 
 ```
 
+### the last fit & visualize the variable importance scores for the top 20 features
+
+```{r}
+# the last model
+lasso_best<-lasso_res%>%
+  select_best(metric = "rmse")
+lasso_best
+
+best_lasso_mod <- 
+  linear_reg(penalty = lasso_best$penalty, mixture = 1) %>%
+  set_engine("glmnet",importance = "impurity")
+
+# the last workflow
+best_lasso_wf <- 
+  lasso_wf %>% 
+  update_model(best_lasso_mod)
+
+# the last fit
+set.seed(701)
+best_lasso_fit <- best_lasso_wf %>% 
+  last_fit(split)
+
+best_lasso_fit
+
+best_lasso_fit %>% 
+  extract_fit_parsnip() %>% 
+  vip(num_features = 20)
+```
+
 ### random forest
 
 ```{r}
@@ -257,7 +286,7 @@ rmse_test <- bind_cols(test %>% select(mcsa),
 rmse_test
 ```
 
-### the last fit&visualize the variable importance scores for the top 20 features
+### the last fit & visualize the variable importance scores for the top 20 features
 
 ```{r}
 
@@ -282,4 +311,51 @@ best_rf_fit
 best_rf_fit %>% 
   extract_fit_parsnip() %>% 
   vip(num_features = 20)
+```
+
+```{r}
+new_recipe<-recipe(mcsa~total_pop+households+h_6to17_single_m+mhi_2018+h_under6_single_m,data = train)%>%
+  step_dummy(all_nominal_predictors())%>%
+  step_zv(all_predictors()) %>% 
+  step_impute_knn(all_predictors())%>%
+  step_scale(all_numeric_predictors())
+bake(prep(recipe, training = train),new_data = train)
+train%>%
+  summarise_all(~ sum(is.na(.)))
+#build the model
+rf_new_mod <- 
+  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) %>% 
+  set_engine("ranger",num.threads = 10) %>% 
+  set_mode("regression")
+#create the workflow
+rf_new_wf <- 
+  workflow() %>% 
+  add_model(rf_new_mod) %>% 
+  add_recipe(recipe)
+# train and tune the model
+set.seed(998)
+rf_new_res <- 
+  rf_new_wf %>% 
+  tune_grid(folds,
+            grid = 5,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+# find the best mtry&min_n value
+rf_new_res %>% 
+  show_best(metric = "rmse")
+
+# plot the visulization of mtry and rmse
+rf_new_rmse<-
+  collect_metrics(rf_new_res, summarize = FALSE) %>% 
+  filter(.metric == "rmse") 
+
+rf_new_plot <-ggplot(rf_new_rmse, aes(x = mtry, y = .estimate,color = id)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "RMSE Across Random Forest Resamples",
+       x = "mtry",
+       y = "RMSE") +
+  theme_minimal()
+
+rf_new_plot 
 ```
