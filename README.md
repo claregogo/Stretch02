@@ -2,6 +2,7 @@
 Author: Zehui Li & Mujin Li
 ### Overview: Predicting Childcare Costs in a County
 This repo is for McCourt Intro to Data Science class Stretch_02, which focus on machine learning contains 4 exercise.
+
 The dataset we are utilizing is sourced from the [National Database of Childcare Prices (NDCP)](https://www.dol.gov/agencies/wb/topics/featured-childcare), which serves as a comprehensive federal repository of childcare pricing information at the county level. This dataset offers detailed insights into childcare costs, categorized by childcare provider type, children's age groups, and various county characteristics. Covering the period from 2008 to 2018, it encompasses a wide range of socio-economic variables pertinent to counties across the United States. It's worth noting that the initial data cleaning and acquisition processes were conducted as part of the Tidy Tuesday project, and you can find further details about the dataset [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-09/readme.md).
 
 The objective of this regression application is to build a predictive model that can estimate the median weekly cost of Center-Based Care for school-age children in a county based on various socio-economic and demographic features of that county. The outcome variable for this regression application is the median weekly cost of Center-Based Care for school-age children (`mcsa`). Center-Based Care refers to childcare provided in a daycare center or facility. Our predictor variables include:`unr_16`: Unemployment rate of the population aged 16 years old or older.`pr_f`: Poverty rate for families.`mhi_2018`: Median household income expressed in 2018 dollars.`total_pop`: Count of the total population etc.- 
@@ -43,8 +44,8 @@ The objective of this regression application is to build a predictive model that
 - [Tidymodels: a predictive modeling case study](https://www.tidymodels.org/start/)
 
 ## Instructions:
-1. Git clone the repo [Link](https://github.com/Freya-MJ/Assignment_08.git)
-2. Install and load the packages: `tidyverse`, `tidymodels`, `recipes`, `patchwork`, `Rfast`, `tidytext`, `parsnip`, `snowballC`, `stopwords`, `gggraph`and `gutenbergr`.
+1. Git clone the repo [Link](https://github.com/claregogo/Stretch02.git))
+2. Install and load the packages: `tidyverse`, `tidymodels`, `recipes`, `dplyr`, `themis`, `ranger`, `vip`, `parsnip`, `ggplot2`, `readr`and `patchwork`.
 3. Run the code in `index.qmd`
 
 
