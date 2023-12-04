@@ -1,54 +1,39 @@
 # Stretch02
 Author: Zehui Li & Mujin Li
-### Overview
+### Overview: Predicting Childcare Costs in a County
 This repo is for McCourt Intro to Data Science class Stretch_02, which focus on machine learning contains 4 exercise.
+The dataset we are utilizing is sourced from the [National Database of Childcare Prices (NDCP)](https://www.dol.gov/agencies/wb/topics/featured-childcare), which serves as a comprehensive federal repository of childcare pricing information at the county level. This dataset offers detailed insights into childcare costs, categorized by childcare provider type, children's age groups, and various county characteristics. Covering the period from 2008 to 2018, it encompasses a wide range of socio-economic variables pertinent to counties across the United States. It's worth noting that the initial data cleaning and acquisition processes were conducted as part of the Tidy Tuesday project, and you can find further details about the dataset [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-09/readme.md).
+The objective of this regression application is to build a predictive model that can estimate the median weekly cost of Center-Based Care for school-age children in a county based on various socio-economic and demographic features of that county. The outcome variable for this regression application is the median weekly cost of Center-Based Care for school-age children (`mcsa`). Center-Based Care refers to childcare provided in a daycare center or facility. Our predictor variables include:`unr_16`: Unemployment rate of the population aged 16 years old or older.`pr_f`: Poverty rate for families.`mhi_2018`: Median household income expressed in 2018 dollars.`total_pop`: Count of the total population etc.- 
 
-- **Exercise 01: set up**
+**Exercise 01: set up**
    - In this exercise, we perform Principal Component Analysis (PCA) on U.S. Senate Votes data from Session 103 to Session 114.
    - The key steps including:
-     -  **Analyze U.S. Senate Votes data from Session 103 to 114.** 
-     -  **Replace missing values and filter data for Session 103.** 
-     -  **Perform Principal Component Analysis (PCA) using the recipes package.**
-     -  **Visualize voting patterns with scatterplots of PC1 and PC2.**
-     -  **Demonstrates the use of PCA for data reduction and visualization.**
+     -  **Data Description and Prediction Application** 
+     -  **Data Splitting** 
+     -  **Exploratory Data Analysis (EDA)**
+     -  **Error Metric and Costs**
+   
+- **Exercise 02: Models** 
+   - Exercise 02 We have identified two different models for our prediction: LASSO, Random Forest.
+   - The result are listed here:
+     - 1. `penalized lasso model`:
+![penalized lasso model](lasso_plot.png){#fig-lasso_plot}
 
-- **Exercise 02: K-Means Clustering of Senate Votes** 
-   - Exercise 02 focuses on conducting cluster analysis on the Senate Votes data using K-Means clustering.
-   - The key steps including:
-     - **Perform cluster analysis on Senate Votes data.**
-     - **Use K-Means clustering with 5-fold cross-validation and hyperparameter tuning.**
-     - **Create a custom function for PCA and K-Means clustering.**
-     - **Visualize clusters with scatterplots for different cluster numbers.**
-     - **Highlights the application of clustering to discover voting behavior patterns.**
+     - 2. `random forest with hyperparameter tuning`:
+![random forest](rf_plot.jpg){#fig-rf_plot}
 
-- **Exercise 03: Text Analysis of Executive Orders** 
-   - Exercise 03 analysis text data from executive orders.
-   - The key steps including:
-     - **Analyze text data from executive orders.**
-     - **Create bigrams from the text and filter out stop words.**
-     - **Calculate TF-IDF for bigrams and presidents.**
-     - **Illustrates text preprocessing, bigram analysis, and TF-IDF calculations.**
+     - 3. `visualize the variable importance scores`:
+![variable importance scores](rf_importance.png){#fig-importance_score}
 
-- **Exercise 04: Predicting Billing Outcome** 
-   - Exercise 04 involves building a supervised machine learning model to predict whether bills passed or not.
-   - The key steps including:
-     - **Build a machine learning model to predict bill outcomes.**
-     - **Preprocess text descriptions of Senate bills.**
-     - **Split data into training and testing sets.**
-     - **Create a recipe for text preprocessing, including tokenization and TF-IDF.**
-     - **Train a logistic regression model and evaluate its performance.**
-     - **Demonstrates text analysis and classification modeling for legislative data.**
+
+- **Exercise 03: Estimate** 
+
+
+- **Exercise 04: Interpretation** 
+  
 
 ### Project Description
 
-1. `penalized lasso model`:
-![penalized lasso model](lasso_plot.png){#fig-lasso_plot}
-
-2. `random forest with hyperparameter tuning`:
-![random forest](rf_plot.jpg){#fig-rf_plot}
-
-3. `visualize the variable importance scores`:
-![variable importance scores](rf_importance.png){#fig-importance_score}
 
 ### Reference
 
