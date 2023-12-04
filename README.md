@@ -32,8 +32,19 @@ The objective of this regression application is to build a predictive model that
   - Implement one candidate model from step two on the training data with resampling methods and hyperparameter tuning (if applicable) using library(tidymodels).
 
 - **Exercise 04: Interpretation** 
-  - Interpret the results in the context of the application.
-  - Explaining and justifying two different feature engineering choices, and ways to improve
+  - We employed Lasso Regression and Random Forest Regression, with RMSE as our evaluation metric.
+After evaluating the model performances, we can draw the following conclusions: The Lasso Regression model achieved a lower RMSE of approximately 20, but the Random Forest Regression model obtained an even lower RMSE of around 10 compared to Lasso.
+This indicates that the Random Forest model performed better, exhibiting better predictive accuracy in terms of childcare cost estimation.
+While both models have their merits and can be valuable in practical applications, we observed a notable difference when examining the importance scores of individual features for each regression model.
+In particular, the Random Forest model identified the county code as the most important feature, which suggests a potential risk of overfitting.
+To address this concern, we decided to utilize the Lasso Regression model to select the top 5 features based on their importance.The top 5 features in lasso are`total_pop` (Total Population)`households` (Number of Households) `h_6to17_single_m` (Median Household Income for Households with Children Aged 6 to 17)`rhi_2018` (Racial and Ethnic Diversity Index in 2018) `h_under6_single_m` (Median Household Income for Households with Children Under 6 Years Old), See importance score picture above.
+We will then incorporate these selected features into the Random Forest model.
+This aims to combine the feature selection capability of Lasso with the predictive power of Random Forest, potentially leading to a more accurate prediction.
+To imporve our model and reduce RMSE, several points can be considered.
+Firstly, transitioning from county-level data to state-level data may lead to improved performance, though it entails significant effort and further learning.
+Secondly, despite our optimization efforts, the final RMSE reduction was not substantial.
+Lastly, we limited our feature selection to only five variables; increasing this count to ten could potentially yield better results.
+These steps signify areas where additional exploration and refinement are needed to enhance our model's predictive accuracy.
 
 ### Reference
 
