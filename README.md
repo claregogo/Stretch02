@@ -3,9 +3,10 @@ Author: Zehui Li & Mujin Li
 ### Overview: Predicting Childcare Costs in a County
 This repo is for McCourt Intro to Data Science class Stretch_02, which focus on machine learning contains 4 exercise.
 The dataset we are utilizing is sourced from the [National Database of Childcare Prices (NDCP)](https://www.dol.gov/agencies/wb/topics/featured-childcare), which serves as a comprehensive federal repository of childcare pricing information at the county level. This dataset offers detailed insights into childcare costs, categorized by childcare provider type, children's age groups, and various county characteristics. Covering the period from 2008 to 2018, it encompasses a wide range of socio-economic variables pertinent to counties across the United States. It's worth noting that the initial data cleaning and acquisition processes were conducted as part of the Tidy Tuesday project, and you can find further details about the dataset [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-09/readme.md).
+
 The objective of this regression application is to build a predictive model that can estimate the median weekly cost of Center-Based Care for school-age children in a county based on various socio-economic and demographic features of that county. The outcome variable for this regression application is the median weekly cost of Center-Based Care for school-age children (`mcsa`). Center-Based Care refers to childcare provided in a daycare center or facility. Our predictor variables include:`unr_16`: Unemployment rate of the population aged 16 years old or older.`pr_f`: Poverty rate for families.`mhi_2018`: Median household income expressed in 2018 dollars.`total_pop`: Count of the total population etc.- 
 
-**Exercise 01: set up**
+- **Exercise 01: set up**
    - In this exercise, we perform Principal Component Analysis (PCA) on U.S. Senate Votes data from Session 103 to Session 114.
    - The key steps including:
      -  **Data Description and Prediction Application** 
@@ -27,13 +28,11 @@ The objective of this regression application is to build a predictive model that
 
 
 - **Exercise 03: Estimate** 
-
+  - Implement one candidate model from step two on the training data with resampling methods and hyperparameter tuning (if applicable) using library(tidymodels).
 
 - **Exercise 04: Interpretation** 
-  
-
-### Project Description
-
+  - Interpret the results in the context of the application.
+  - Explaining and justifying two different feature engineering choices, and ways to improve
 
 ### Reference
 
