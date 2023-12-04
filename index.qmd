@@ -9,9 +9,9 @@ format:
     embed-resources: true
 ---
 
-## 1. set up
+## 1. Set up
 
-### library
+### load the packages
 
 ```{r}
 library(mice) # for imputating missing value
@@ -31,9 +31,13 @@ library(patchwork)
 library(readr)       # for importing data
 ```
 
-### data setup
+### a. Data preparation and introduction
+Predicting Childcare Costs in a County
 
-[data from tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-09/readme.md)
+The dataset we are utilizing is sourced from the [National Database of Childcare Prices (NDCP)](https://www.dol.gov/agencies/wb/topics/featured-childcare), which serves as a comprehensive federal repository of childcare pricing information at the county level. This dataset offers detailed insights into childcare costs, categorized by childcare provider type, children's age groups, and various county characteristics. Covering the period from 2008 to 2018, it encompasses a wide range of socio-economic variables pertinent to counties across the United States. It's worth noting that the initial data cleaning and acquisition processes were conducted as part of the Tidy Tuesday project, and you can find further details about the dataset [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-09/readme.md).
+
+The objective of this regression application is to build a predictive model that can estimate the median weekly cost of Center-Based Care for school-age children in a county based on various socio-economic and demographic features of that county. The outcome variable for this regression application is the median weekly cost of Center-Based Care for school-age children (`mcsa`). Center-Based Care refers to childcare provided in a daycare center or facility. our predictor variables include:`unr_16`: Unemployment rate of the population aged 16 years old or older.`pr_f`: Poverty rate for families.`mhi_2018`: Median household income expressed in 2018 dollars.`total_pop`: Count of the total population etc.
+
 
 ```{r}
 # All packages used in this script:
@@ -82,7 +86,7 @@ childcare_costs <- childcare_costs_raw |>
   )
 ```
 
-### Split the data into training and testing data
+### b.Split the data into training and testing data
 
 predictor: Center-Based Care for those who are school age based
 
@@ -127,14 +131,45 @@ train<-training(split)
 test<-testing(split)
 ```
 
-#### set resample
+### c.Explortary data analysis
+```{r}
+#Distribution about mcsa
+ggplot(data = train, aes(x = mcsa)) +
+  geom_histogram(fill = "blue", color = "black", bins = 30) +
+  labs(title = "Distribution of MCSA",
+       x = "MCSA",
+       y = "Frequency")+
+  theme_minimal()
+# Scatter Plot of MCSA vs. Median Household Income
+ggplot(data = train, aes(x = mhi_2018, y = mcsa)) +
+  geom_point() +
+  labs(title = "Scatter Plot of MCSA vs. Median Household Income",
+       x = "Median Household Income (2018)",
+       y = "MCSA")+
+  theme_minimal()
+# Bar chart for 'study_year'
+ggplot(data = train, aes(x = factor(study_year))) +
+  geom_bar(fill = "blue", color = "black",width = 0.5) +
+  labs(title = "Distribution of Study Years",
+       x = "Study Year",
+       y = "Count")+
+  theme_minimal()
+```
 
+### d.Error Metric
+
+RMSE, which stands for Root Mean Square Error, is a commonly used metric in regression analysis to quantify the average magnitude of errors between predicted values and actual observed values. It measures the square root of the average of the squared differences between predicted and observed values. Larger errors, as indicated by RMSE, generally incur higher costs. "mcsa" relates to childcare costs, larger prediction errors might affect budget planning or subsidy allocation.There is no universal threshold for RMSE, and it should be determined according to the application's requirements and acceptable level of prediction accuracy. Generally, a lower RMSE values indicating better model performance. Since we are dealing with a regression problem, the concepts of false positives and false negatives are more relevant in classification tasks.
+MSE: $$ MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$ 
+RMSE: $$ RMSE = \sqrt{MSE} $$ 
+MAE: $$ MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i| $$
+
+#### set resample
 ```{r}
 set.seed(234)
 folds<-vfold_cv(train, v = 10)
 ```
 
-## 2.come up with models
+## 2&3 come up with models
 
 ### create recipe
 
@@ -359,3 +394,13 @@ rf_new_plot <-ggplot(rf_new_rmse, aes(x = mtry, y = .estimate,color = id)) +
 
 rf_new_plot 
 ```
+
+## 4.Interpretation
+
+We employed Lasso Regression and Random Forest Regression, with RMSE as our evaluation metric. After evaluating the model performances, we can draw the following conclusions:
+The Lasso Regression model achieved a lower RMSE of approximately 20, but the Random Forest Regression model obtained an even lower RMSE of around 10 compared to Lasso. This indicates that the Random Forest model performed better, exhibiting better predictive accuracy in terms of childcare cost estimation.
+While both models have their merits and can be valuable in practical applications, we observed a notable difference when examining the importance scores of individual features for each regression model. In particular, the Random Forest model identified the county code as the most important feature, which suggests a potential risk of overfitting.
+To address this concern, we decided to utilize the Lasso Regression model to select the top 5 features based on their importance.The top 5 features in lasso are`total_pop` (Total Population)`households` (Number of Households) `h_6to17_single_m` (Median Household Income for Households with Children Aged 6 to 17)`rhi_2018` (Racial and Ethnic Diversity Index in 2018) `h_under6_single_m` (Median Household Income for Households with Children Under 6 Years Old), See importance score picture above. We will then incorporate these selected features into the Random Forest model. This aims to combine the feature selection capability of Lasso with the predictive power of Random Forest, potentially leading to a more accurate prediction.
+To imporve our model and reduce RMSE, several points can be considered. Firstly, transitioning from county-level data to state-level data may lead to improved performance, though it entails significant effort and further learning. Secondly, despite our optimization efforts, the final RMSE reduction was not substantial. Lastly, we limited our feature selection to only five variables; increasing this count to ten could potentially yield better results. These steps signify areas where additional exploration and refinement are needed to enhance our model's predictive accuracy.
+
+
